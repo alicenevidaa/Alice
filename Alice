@@ -1,31 +1,37 @@
+print("[Kaitun] Script started")
+
 local function __safeWait(cond, timeout, label)
-  timeout = timeout or 20
+  timeout = timeout or 30
   local t0 = tick()
   repeat
-    local ok = pcall(cond)
-    if ok then return true end
+    local ok, done = pcall(cond)
+    if ok and done then return true end
     task.wait(0.1)
   until tick() - t0 > timeout
-  warn("[Kaitun] Timeout waiting for: " .. tostring(label or "?"))
+  warn("[Kaitun] Timeout: " .. tostring(label or "?"))
   return false
 end
 
-__safeWait(function() return game:IsLoaded() end, 20, "game:IsLoaded")
-__safeWait(function() return game.Players.LocalPlayer ~= nil end, 15, "LocalPlayer")
+if getgenv().LoadScript and getgenv().Window then
+  pcall(function()
+    if getgenv().Window.Destroy then getgenv().Window:Destroy() end
+  end)
+  getgenv().LoadScript = nil
+end
+getgenv().LoadScript = true
+
+__safeWait(function() return game:IsLoaded() and game.Players.LocalPlayer ~= nil end, 25, "game:IsLoaded")
 __safeWait(function() return game:FindFirstChild("CoreGui") ~= nil end, 15, "CoreGui")
 __safeWait(function()
   local lp = game.Players.LocalPlayer
-  return lp and lp:FindFirstChildOfClass("PlayerGui") ~= nil
-end, 20, "PlayerGui")
-__safeWait(function()
-  local lp = game.Players.LocalPlayer
   local pg = lp and lp:FindFirstChildOfClass("PlayerGui")
-  return pg and pg:FindFirstChild("LoadingScreen") == nil
+  return pg and not pg:FindFirstChild("LoadingScreen")
 end, 30, "LoadingScreen")
 __safeWait(function()
   local lp = game.Players.LocalPlayer
-  return lp and lp:FindFirstChild("DataLoaded") ~= nil
+  return game:IsLoaded() and lp and lp:FindFirstChild("DataLoaded") ~= nil
 end, 30, "DataLoaded")
+print("[Kaitun] Game ready")
 
   local settings, HttpService, settingsFolder, settingsSuffix = {
 }, game:GetService("HttpService"), "Banana Cat Hub", "-KaitunLeviathan.json";
@@ -109,25 +115,19 @@ if type(resolvedRequest) ~= "function" then
 end
 getgenv().ExploitReq = resolvedRequest
 
-  if getgenv().LoadScript then
-  return;
-end
-;
-getgenv().LoadScript = true;
-local localPlayer = game.Players.LocalPlayer;
-getgenv().getupvalue = debug.getupvalue;
-getgenv().getupvalues = debug.getupvalues;
-
-local worldOriginRef    = game.workspace._WorldOrigin
-local CommF_Ref         = game.ReplicatedStorage.Remotes.CommF_
-local VirtualUserSvc    = game:GetService("VirtualUser")
+local localPlayer = game.Players.LocalPlayer
+getgenv().getupvalue = debug.getupvalue
+getgenv().getupvalues = debug.getupvalues
+local worldOriginRef = game.workspace._WorldOrigin
+local CommF_Ref = game.ReplicatedStorage.Remotes.CommF_
+local VirtualUserSvc = game:GetService("VirtualUser")
 
 pcall(function()
   game:GetService("Players").LocalPlayer.Idled:connect(function ()
-    VirtualUserSvc:Button2Down(Vector2.new(0, 0), workspace.CurrentCamera.CFrame);
-    wait(1);
-    VirtualUserSvc:Button2Up(Vector2.new(0, 0), workspace.CurrentCamera.CFrame);
-  end);
+    VirtualUserSvc:Button2Down(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
+    wait(1)
+    VirtualUserSvc:Button2Up(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
+  end)
 end)
 
 local PlayersSvc = game:GetService("Players")
@@ -146,181 +146,177 @@ game:GetService("RunService");
   }, {
 };
 local o = false;
-    local function W(P, Z, n) if not P then
-    return;
-  end
-  ;
-  TweenServiceSvc:Create(P, TweenInfo.new(n or 0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), Z):Play();
+local function W(P, Z, n) if not P then return end
+  TweenServiceSvc:Create(P, TweenInfo.new(n or 0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), Z):Play()
 end
 ;
-  G.CreateStatusUI = function ()
-  local pg = PlayersSvc.LocalPlayer:WaitForChild("PlayerGui", 10);
+  G.CreateStatusUI = function () local pg = PlayersSvc.LocalPlayer:WaitForChild("PlayerGui", 10)
   if not pg then return end
-  local existing = pg:FindFirstChild("BCH_Status");
+  local existing = pg:FindFirstChild("BCH_Status")
     if existing then
-    f.Gui = existing;
-    f.Pill = existing:FindFirstChild("Pill");
+    f.Gui = existing
+    f.Pill = existing:FindFirstChild("Pill")
       if f.Pill then
-      f.Dot = f.Pill:FindFirstChild("Dot");
-      f.Label = f.Pill:FindFirstChild("Label");
-      f.Stroke = f.Pill:FindFirstChildOfClass("UIStroke");
+      f.Dot = f.Pill:FindFirstChild("Dot")
+      f.Label = f.Pill:FindFirstChild("Label")
+      f.Stroke = f.Pill:FindFirstChildOfClass("UIStroke")
     end
     ;
-    return;
+    return
   end
   ;
-  local gui = Instance.new("ScreenGui");
-  gui.Name = "BCH_Status";
-  gui.ResetOnSpawn = false;
-  gui.IgnoreGuiInset = true;
-  gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling;
-  gui.Parent = pg;
-  f.Gui = gui;
+  local gui = Instance.new("ScreenGui")
+  gui.Name = "BCH_Status"
+  gui.ResetOnSpawn = false
+  gui.IgnoreGuiInset = true
+  gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+  gui.Parent = pg
+  f.Gui = gui
 
-  local pill = Instance.new("Frame");
-  pill.Name = "Pill";
-  pill.AutomaticSize = Enum.AutomaticSize.X;
-  pill.Size = UDim2.new(0, 0, 0, 28);
-  pill.AnchorPoint = Vector2.new(0.5, 0);
-  pill.Position = UDim2.new(0.5, 0, 0, 10);
-  pill.BackgroundColor3 = Color3.fromRGB(12, 12, 16);
-  pill.BackgroundTransparency = 0.15;
-  pill.BorderSizePixel = 0;
-  pill.ZIndex = 10;
-  pill.Parent = gui;
-  f.Pill = pill;
+  local pill = Instance.new("Frame")
+  pill.Name = "Pill"
+  pill.AutomaticSize = Enum.AutomaticSize.X
+  pill.Size = UDim2.new(0, 0, 0, 28)
+  pill.AnchorPoint = Vector2.new(0.5, 0)
+  pill.Position = UDim2.new(0.5, 0, 0, 10)
+  pill.BackgroundColor3 = Color3.fromRGB(12, 12, 16)
+  pill.BackgroundTransparency = 0.15
+  pill.BorderSizePixel = 0
+  pill.ZIndex = 10
+  pill.Parent = gui
+  f.Pill = pill
 
-  local corner = Instance.new("UICorner");
-  corner.CornerRadius = UDim.new(1, 0);
-  corner.Parent = pill;
+  local corner = Instance.new("UICorner")
+  corner.CornerRadius = UDim.new(1, 0)
+  corner.Parent = pill
 
-  local pad = Instance.new("UIPadding");
-  pad.PaddingLeft = UDim.new(0, 14);
-  pad.PaddingRight = UDim.new(0, 16);
-  pad.Parent = pill;
+  local pad = Instance.new("UIPadding")
+  pad.PaddingLeft = UDim.new(0, 14)
+  pad.PaddingRight = UDim.new(0, 16)
+  pad.Parent = pill
 
-  local stroke = Instance.new("UIStroke");
-  stroke.Color = Color3.fromRGB(40, 40, 50);
-  stroke.Thickness = 1;
-  stroke.Transparency = 0.5;
-  stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border;
-  stroke.Parent = pill;
-  f.Stroke = stroke;
+  local stroke = Instance.new("UIStroke")
+  stroke.Color = Color3.fromRGB(40, 40, 50)
+  stroke.Thickness = 1
+  stroke.Transparency = 0.5
+  stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+  stroke.Parent = pill
+  f.Stroke = stroke
 
-  local list = Instance.new("UIListLayout");
-  list.FillDirection = Enum.FillDirection.Horizontal;
-  list.VerticalAlignment = Enum.VerticalAlignment.Center;
-  list.Padding = UDim.new(0, 8);
-  list.SortOrder = Enum.SortOrder.LayoutOrder;
-  list.Parent = pill;
+  local list = Instance.new("UIListLayout")
+  list.FillDirection = Enum.FillDirection.Horizontal
+  list.VerticalAlignment = Enum.VerticalAlignment.Center
+  list.Padding = UDim.new(0, 8)
+  list.SortOrder = Enum.SortOrder.LayoutOrder
+  list.Parent = pill
 
-  local dot = Instance.new("Frame");
-  dot.Name = "Dot";
-  dot.Size = UDim2.new(0, 6, 0, 6);
-  dot.BackgroundColor3 = G.Colors.White;
-  dot.BorderSizePixel = 0;
-  dot.ZIndex = 12;
-  dot.LayoutOrder = 1;
-  dot.Parent = pill;
-  f.Dot = dot;
+  local dot = Instance.new("Frame")
+  dot.Name = "Dot"
+  dot.Size = UDim2.new(0, 6, 0, 6)
+  dot.BackgroundColor3 = G.Colors.White
+  dot.BorderSizePixel = 0
+  dot.ZIndex = 12
+  dot.LayoutOrder = 1
+  dot.Parent = pill
+  f.Dot = dot
 
-  local dotCorner = Instance.new("UICorner");
-  dotCorner.CornerRadius = UDim.new(1, 0);
-  dotCorner.Parent = dot;
+  local dotCorner = Instance.new("UICorner")
+  dotCorner.CornerRadius = UDim.new(1, 0)
+  dotCorner.Parent = dot
 
-  local label = Instance.new("TextLabel");
-  label.Name = "Label";
-  label.AutomaticSize = Enum.AutomaticSize.X;
-  label.Size = UDim2.new(0, 0, 1, 0);
-  label.BackgroundTransparency = 1;
-  label.Text = "Idle";
-  label.Font = Enum.Font.GothamMedium;
-  label.TextSize = 12;
-  label.TextColor3 = G.Colors.White;
-  label.TextXAlignment = Enum.TextXAlignment.Left;
-  label.TextYAlignment = Enum.TextYAlignment.Center;
-  label.ZIndex = 12;
-  label.LayoutOrder = 2;
-  label.Parent = pill;
-  f.Label = label;
+  local label = Instance.new("TextLabel")
+  label.Name = "Label"
+  label.AutomaticSize = Enum.AutomaticSize.X
+  label.Size = UDim2.new(0, 0, 1, 0)
+  label.BackgroundTransparency = 1
+  label.Text = "Idle"
+  label.Font = Enum.Font.GothamMedium
+  label.TextSize = 12
+  label.TextColor3 = G.Colors.White
+  label.TextXAlignment = Enum.TextXAlignment.Left
+  label.TextYAlignment = Enum.TextYAlignment.Center
+  label.ZIndex = 12
+  label.LayoutOrder = 2
+  label.Parent = pill
+  f.Label = label
 
-  pill.Position = UDim2.new(0.5, 0, 0, -20);
-  pill.BackgroundTransparency = 1;
-  label.TextTransparency = 1;
-  dot.BackgroundTransparency = 1;
+  pill.Position = UDim2.new(0.5, 0, 0, -20)
+  pill.BackgroundTransparency = 1
+  label.TextTransparency = 1
+  dot.BackgroundTransparency = 1
 
-  W(pill, { Position = UDim2.new(0.5, 0, 0, 10), BackgroundTransparency = 0.15 }, 0.4);
-  W(label, { TextTransparency = 0 }, 0.35);
-  W(dot, { BackgroundTransparency = 0 }, 0.35);
+  W(pill, { Position = UDim2.new(0.5, 0, 0, 10), BackgroundTransparency = 0.15 }, 0.4)
+  W(label, { TextTransparency = 0 }, 0.35)
+  W(dot, { BackgroundTransparency = 0 }, 0.35)
 end
 ;
-  G.SetStatus = function (text, color)
-  G.CreateStatusUI();
+  G.SetStatus = function (text, color) G.CreateStatusUI()
     if o then return end
   ;
-  o = true;
-  text, color = tostring(text or "Idle"), color or G.Colors.White;
+  o = true
+  text, color = tostring(text or "Idle"), color or G.Colors.White
     if X == text then
-    o = false;
-    return;
+    o = false
+    return
   end
   ;
-  X = text;
-    W(f.Label, { TextTransparency = 1 }, 0.08);
-  task.wait(0.07);
+  X = text
+    W(f.Label, { TextTransparency = 1 }, 0.08)
+  task.wait(0.07)
     if not f.Label then
-    o = false;
-    return;
+    o = false
+    return
   end
   ;
-  f.Label.Text = text;
-  f.Label.TextColor3 = color;
+  f.Label.Text = text
+  f.Label.TextColor3 = color
     if f.Dot then f.Dot.BackgroundColor3 = color end
   ;
     if f.Stroke then
-      W(f.Stroke, { Color = color, Transparency = 0.3 }, 0.2);
+      W(f.Stroke, { Color = color, Transparency = 0.3 }, 0.2)
         task.delay(1, function () if f.Stroke then
-          W(f.Stroke, { Color = Color3.fromRGB(40, 40, 50), Transparency = 0.5 }, 0.6);
-      end end);
+          W(f.Stroke, { Color = Color3.fromRGB(40, 40, 50), Transparency = 0.5 }, 0.6)
+      end end)
   end
   ;
-    W(f.Label, { TextTransparency = 0 }, 0.12);
+    W(f.Label, { TextTransparency = 0 }, 0.12)
     if color == G.Colors.Red and f.Pill then
-      task.spawn(function () local base = UDim2.new(0.5, 0, 0, 10);
+      task.spawn(function () local base = UDim2.new(0.5, 0, 0, 10)
         for _ = 1, 3 do
-        f.Pill.Position = base + UDim2.new(0, math.random(-2, 2), 0, 0);
-        task.wait(0.02);
+        f.Pill.Position = base + UDim2.new(0, math.random(-2, 2), 0, 0)
+        task.wait(0.02)
       end
       ;
-        W(f.Pill, { Position = base }, 0.1);
-      end);
+        W(f.Pill, { Position = base }, 0.1)
+      end)
     end
     ;
-  task.wait(0.03);
-  o = false;
+  task.wait(0.03)
+  o = false
 end
 ;
-  G.ShowStatus = function () G.CreateStatusUI();
+  G.ShowStatus = function () G.CreateStatusUI()
     if f.Pill then
-    f.Pill.Visible = true;
-      W(f.Pill, { Position = UDim2.new(0.5, 0, 0, 10), BackgroundTransparency = 0.15 }, 0.3);
+    f.Pill.Visible = true
+      W(f.Pill, { Position = UDim2.new(0.5, 0, 0, 10), BackgroundTransparency = 0.15 }, 0.3)
   end
   ;
-    W(f.Label, { TextTransparency = 0 }, 0.2);
-    W(f.Dot, { BackgroundTransparency = 0 }, 0.2);
+    W(f.Label, { TextTransparency = 0 }, 0.2)
+    W(f.Dot, { BackgroundTransparency = 0 }, 0.2)
 end
 ;
-  G.HideStatus = function () if not f.Pill then return end;
-    W(f.Pill, { Position = UDim2.new(0.5, 0, 0, -20), BackgroundTransparency = 1 }, 0.2);
-    W(f.Label, { TextTransparency = 1 }, 0.15);
-    W(f.Dot, { BackgroundTransparency = 1 }, 0.15);
-      task.delay(0.22, function () if f.Pill then f.Pill.Visible = false end end);
+  G.HideStatus = function () if not f.Pill then return end
+    W(f.Pill, { Position = UDim2.new(0.5, 0, 0, -20), BackgroundTransparency = 1 }, 0.2)
+    W(f.Label, { TextTransparency = 1 }, 0.15)
+    W(f.Dot, { BackgroundTransparency = 1 }, 0.15)
+      task.delay(0.22, function () if f.Pill then f.Pill.Visible = false end end)
 end
 ;
   G.Destroy = function () if f.Gui then f.Gui:Destroy() end; f = {}; end
 ;
-pcall(G.CreateStatusUI);
+pcall(G.CreateStatusUI)
 
+print("[Kaitun] Loading Fluent UI...")
 local Fluent
 local fluentOk, fluentErr = pcall(function()
   Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
@@ -330,7 +326,7 @@ if not fluentOk or not Fluent then
   return
 end
 
-  getgenv().Window = Fluent:CreateWindow({
+local Window = Fluent:CreateWindow({
   Title = "Banana Cat Hub-Kaitun Leviathan" .. (if getgenv().Key and #getgenv().Key == 32 then " [ Free ]" else " [ Premium ]"),
   SubTitle = "by Obii",
   TabWidth = 125,
@@ -338,7 +334,8 @@ end
   Acrylic = false,
   Theme = "Dark",
   MinimizeKey = Enum.KeyCode.LeftControl
-});
+})
+getgenv().Window = Window
 
   local function InstallAimPosRemoteHook()
     if getgenv().__KaitunAimPosHookInstalled then return true end
@@ -374,34 +371,22 @@ end
   pcall(InstallAimPosRemoteHook)
   function Translate(h) return h end
 ;
-tick();
+tick()
   z = {
-    TabHunt = Window:AddTab({
-    Title = "Tab Setup Hunt Leviathan",
-    Icon = ""
-  }),
-    SettingSkillMain = Window:AddTab({
-    Title = "Setting Hold \10 and Select Skill",
-    Icon = ""
-  }),
-    TabDevilFruit = Window:AddTab({
-    Title = "Tab Devil Fruit",
-    Icon = ""
-  }),
-    WebhookTab = Window:AddTab({
-    Title = Translate("Tab Webhook"),
-    Icon = ""
-  })
+    TabHunt = Window:AddTab({ Title = "Tab Setup Hunt Leviathan", Icon = "" }),
+    SettingSkillMain = Window:AddTab({ Title = "Setting Hold \\10 and Select Skill", Icon = "" }),
+    TabDevilFruit = Window:AddTab({ Title = "Tab Devil Fruit", Icon = "" }),
+    WebhookTab = Window:AddTab({ Title = Translate("Tab Webhook"), Icon = "" })
 };
-getgenv().Options = Fluent.Options;
-Window:SelectTab(1);
+getgenv().Options = Fluent.Options
+Window:SelectTab(1)
+print("[Kaitun] UI created")
 
 task.spawn(function()
     local ok, err = pcall(function()
         local CoreGuiService = game:GetService("CoreGui")
         local oldGui = CoreGuiService:FindFirstChild("Banana Cat Hub Btn")
         if oldGui then oldGui:Destroy() end
-
         getgenv().UIToggled = true
         local BananaCatHubBtn = Instance.new("ScreenGui")
         BananaCatHubBtn.Name = "Banana Cat Hub Btn"
@@ -409,20 +394,16 @@ task.spawn(function()
         BananaCatHubBtn.Enabled = true
         BananaCatHubBtn.ResetOnSpawn = false
         BananaCatHubBtn.Parent = CoreGuiService
-
         local dutdit = Instance.new("Frame")
         dutdit.Name = "dut dit"
         dutdit.AnchorPoint = Vector2.new(0, 1)
         dutdit.Size = UDim2.new(0, 50, 0, 50)
         dutdit.Position = UDim2.new(0, 15, 0.2, 5)
         dutdit.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-        dutdit.BackgroundTransparency = 0
         dutdit.Parent = BananaCatHubBtn
-
         local UICorner = Instance.new("UICorner")
         UICorner.CornerRadius = UDim.new(1, 0)
         UICorner.Parent = dutdit
-
         local TextButton = Instance.new("TextButton")
         TextButton.Name = "ToggleButton"
         TextButton.BackgroundTransparency = 1
@@ -430,7 +411,6 @@ task.spawn(function()
         TextButton.Size = UDim2.new(1, 0, 1, 0)
         TextButton.ZIndex = 3
         TextButton.Parent = dutdit
-
         local ImageLabel = Instance.new("ImageLabel")
         ImageLabel.Name = "Icon"
         ImageLabel.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -438,10 +418,8 @@ task.spawn(function()
         ImageLabel.Size = UDim2.new(0, 40, 0, 40)
         ImageLabel.Image = "rbxassetid://5009915795"
         ImageLabel.BackgroundTransparency = 1
-        ImageLabel.Active = false
         ImageLabel.ZIndex = 2
         ImageLabel.Parent = dutdit
-
         local TweenServiceLocal = game:GetService("TweenService")
         local clickLock = false
         local iconSmall = UDim2.new(0, 30, 0, 30)
@@ -449,41 +427,28 @@ task.spawn(function()
         TextButton.Activated:Connect(function()
             if clickLock then return end
             clickLock = true
-
             getgenv().UIToggled = not (getgenv().UIToggled == true)
             local minimized = getgenv().UIToggled == false
             local targetIconSize = minimized and iconSmall or iconLarge
             local targetBackgroundTransparency = minimized and 0.25 or 0
-
             pcall(function()
-                TweenServiceLocal:Create(ImageLabel, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                    Size = targetIconSize
-                }):Play()
-                TweenServiceLocal:Create(dutdit, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                    BackgroundTransparency = targetBackgroundTransparency
-                }):Play()
+                TweenServiceLocal:Create(ImageLabel, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { Size = targetIconSize }):Play()
+                TweenServiceLocal:Create(dutdit, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { BackgroundTransparency = targetBackgroundTransparency }):Play()
             end)
-
             local VirtualInput = game:GetService("VirtualInputManager")
-            pcall(function()
-                VirtualInput:SendKeyEvent(true, Enum.KeyCode.LeftControl, false, game)
-            end)
+            pcall(function() VirtualInput:SendKeyEvent(true, Enum.KeyCode.LeftControl, false, game) end)
             task.wait(0.05)
-            pcall(function()
-                VirtualInput:SendKeyEvent(false, Enum.KeyCode.LeftControl, false, game)
-            end)
-
+            pcall(function() VirtualInput:SendKeyEvent(false, Enum.KeyCode.LeftControl, false, game) end)
             task.wait(0.25)
             clickLock = false
         end)
     end)
-    if not ok then warn("[Kaitun] Floating button error: " .. tostring(err)) end
 end)
 
-local h = false;
-getgenv().IsPlayerDead = function ()
-  if not localPlayer.Character or not localPlayer.Character:FindFirstChild("Humanoid") or localPlayer.Character.Humanoid.Health == 0 then
-    return true;
+local h = false
+getgenv().ReadyToDodge = getgenv().ReadyToDodge or false
+    getgenv().IsPlayerDead = function () if not localPlayer.Character or not localPlayer.Character:FindFirstChild("Humanoid") or localPlayer.Character.Humanoid.Health == 0 then
+    return true
   end
   ;
 end
@@ -494,7 +459,7 @@ end
         return nil
       end
       stopDistance = tonumber(stopDistance) or 3
-      speed = math.max(tonumber(speed) or tonumber(settings["Speed Tween "]) or 300, 1)
+      speed = math.max(tonumber(speed) or tonumber(settings["Speed Tween "]) or 275, 1)
       local previous = getgenv().__KaitunBFMainTween
       if previous and previous.active and previous.part == part and previous.target
         and (previous.target.Position - targetCFrame.Position).Magnitude <= 12 then
@@ -505,7 +470,6 @@ end
       if getgenv().Tween and getgenv().Tween ~= previous then
         pcall(function() getgenv().Tween:Cancel() end)
       end
-
       local runService = game:GetService("RunService")
       local character = localPlayer.Character
       local state = {active = true, part = part, target = targetCFrame}
@@ -516,10 +480,12 @@ end
         if getgenv().Tween == self then getgenv().Tween = nil end
       end
       function state:Destroy() self:Cancel() end
-
       getgenv().__KaitunBFMainTween = state
       getgenv().Tween = state
       task.spawn(function()
+        local bestDistance = math.huge
+        local lastProgress = tick()
+        local speedCap = math.max(speed, 1000)
         while state.active do
           local dt = runService.Heartbeat:Wait()
           local currentCharacter = localPlayer.Character
@@ -528,7 +494,6 @@ end
             or part.Parent ~= currentCharacter or part.Anchored then
             break
           end
-
           local goal = state.target
           local offset = goal.Position - part.Position
           local distance = offset.Magnitude
@@ -540,8 +505,15 @@ end
             end)
             break
           end
-
-          local step = math.min(distance, speed * math.max(dt, 0), 20)
+          if distance < bestDistance - 5 then
+            bestDistance = distance
+            lastProgress = tick()
+            speedCap = math.min(1000, speedCap * 1.03)
+          elseif tick() - lastProgress > 2.5 then
+            speedCap = math.max(speed, speedCap * 0.7)
+            lastProgress = tick()
+          end
+          local step = math.min(distance, math.min(speed, speedCap) * math.max(dt, 0), 18)
           if step <= 0 then continue end
           local nextPosition = part.Position + offset.Unit * step
           part.CFrame = CFrame.new(nextPosition) * goal.Rotation
@@ -551,7 +523,6 @@ end
           end)
           getgenv().noclip = true
         end
-
         if state.active and part.Parent == localPlayer.Character and state.target
           and (part.Position - state.target.Position).Magnitude <= stopDistance then
           part.CFrame = state.target
@@ -563,112 +534,121 @@ end
       return state
     end
 
-    function toTarget(f, X, o, W, P)
-      if IsPlayerDead() then
-        if getgenv().Tween then
-          getgenv().Tween:Pause();
-          getgenv().Tween:Cancel();
-        end
-        repeat
-          wait();
-          if getgenv().Tween then
-            getgenv().Tween:Pause();
-            getgenv().Tween:Cancel();
-          end
-        until localPlayer.Character:FindFirstChild("Humanoid") and localPlayer.Character.Humanoid.Health > 0;
-        wait(3);
-        return;
-      end
-
-      if game.Players.LocalPlayer.Character:FindFirstChild("Humanoid") and game.Players.LocalPlayer.Character.Humanoid.Sit then
-        if getgenv().Tween then
-          getgenv().Tween:Pause();
-          getgenv().Tween:Cancel();
-        end
-        wait(1);
-        getgenv().noclip = false;
-        game:GetService("VirtualInputManager"):SendKeyEvent(true, "Space", false, game);
-        wait();
-        game:GetService("VirtualInputManager"):SendKeyEvent(false, "Space", false, game);
-        wait(1);
-        if localPlayer.Character:FindFirstChild("Humanoid") and (localPlayer.Character:FindFirstChild("HumanoidRootPart")) and (localPlayer.Character.HumanoidRootPart:FindFirstChild("EffectsSY")) then
-          localPlayer.Character.HumanoidRootPart.EffectsSY:Destroy();
-        end
-        wait(0.5);
-        game.Players.LocalPlayer.Character.Humanoid.Jump = true;
-        wait(1);
-        localPlayer.Character.HumanoidRootPart.CFrame = localPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0, 10, 0);
-        return;
-      end
-
-      local Z = 300;
-      local ReadyToDodge = getgenv().ReadyToDodge == true;
-
-      if localPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        local n = localPlayer.Character.Humanoid.Health / localPlayer.Character.Humanoid.MaxHealth;
-        if n < 0.4 then
-          h = true;
-        else
-          local M = localPlayer.Character.Humanoid.Health / localPlayer.Character.Humanoid.MaxHealth;
-          if M > 0.6 then h = false end
-        end
-
-        if (X - f).Magnitude <= 3 and not W and not h and not ReadyToDodge then
-          getgenv().noclip = true;
-          if getgenv().Tween then
-            getgenv().Tween:Pause();
-            getgenv().Tween:Cancel();
-          end
-          localPlayer.Character.HumanoidRootPart.CFrame = o;
-        else
-          local tweenSpeed = tonumber(settings["Speed Tween "]) or Z or 300;
-          if game.Players.LocalPlayer.Character:FindFirstChild("Humanoid") and localPlayer.Character.Humanoid.Health > 0 then
-            n = CFrame.new(0, 0, 0);
-            if not P then
-              n = ReadyToDodge and CFrame.new(0, 200, 0) or n;
-              if h then
-                local detectLev = getgenv().DetectLeviathan
-                local levTarget = nil
-                local seaBeasts = game.workspace:FindFirstChild("SeaBeasts")
-                if seaBeasts and detectLev then
-                  levTarget = detectLev(seaBeasts, 2) or detectLev(seaBeasts, 3)
-                    or detectLev(seaBeasts, 4) or detectLev(seaBeasts)
-                end
-                local frozenDim = game.workspace._WorldOrigin.Locations:FindFirstChild("Frozen Dimension")
-                local h = levTarget or frozenDim
-                local f = settings["Select Owner Boat Beast Hunter"];
-                if h and not (type(f) == "string" and f ~= "" and string.lower(localPlayer.Name) == string.lower(f)) and f and f ~= "" then
-                  local ownerPlr = game.Players:FindFirstChild(f);
-                  local ownerHrp = ownerPlr and ownerPlr.Character and (ownerPlr.Character:FindFirstChild("HumanoidRootPart"));
-                  if ownerHrp then
-                    local X, P = localPlayer.Character.HumanoidRootPart.Position, ownerHrp.Position;
-                    local dir = Vector3.new(X.X - P.X, 0, X.Z - P.Z);
-                    local unit = dir.Magnitude > 0.5 and dir.Unit or (Vector3.new(1, 0, 0));
-                    local escape = Vector3.new(P.X + unit.X * 300, 0, P.Z + unit.Z * 300);
-                    n = (CFrame.new(escape.X - o.Position.X, 800, escape.Z - o.Position.Z));
-                  else
-                    n = (CFrame.new(0, 800, 0));
-                  end
-                else
-                  n = (CFrame.new(0, 800, 0));
-                end
-              end
-            end
-
-            if (Vector3.new(0, localPlayer.Character:FindFirstChild("HumanoidRootPart").Position.Y, 0) - Vector3.new(0, -60, 0)).Magnitude <= 60 then
-              localPlayer.Character.HumanoidRootPart.CFrame = localPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0);
-            end
-
-            StartBFMainTween(localPlayer.Character.HumanoidRootPart, o * n, tweenSpeed, 3);
-            getgenv().noclip = true;
-          end
-        end
-      end
+    function toTarget(f, X, o, W, P) if IsPlayerDead() then
+      if getgenv().Tween then
+      getgenv().Tween:Pause()
+      getgenv().Tween:Cancel()
     end
+    ;
+      repeat wait()
+        if getgenv().Tween then
+        getgenv().Tween:Pause()
+        getgenv().Tween:Cancel()
+      end
+      ;
+    until localPlayer.Character:FindFirstChild("Humanoid") and localPlayer.Character.Humanoid.Health > 0
+    wait(3)
+    return
+  end
+  ;
+    if game.Players.LocalPlayer.Character:FindFirstChild("Humanoid") and game.Players.LocalPlayer.Character.Humanoid.Sit then
+      if getgenv().Tween then
+      getgenv().Tween:Pause()
+      getgenv().Tween:Cancel()
+    end
+    ;
+    wait(1)
+    getgenv().noclip = false
+    game:GetService("VirtualInputManager"):SendKeyEvent(true, "Space", false, game)
+    wait()
+    game:GetService("VirtualInputManager"):SendKeyEvent(false, "Space", false, game)
+    wait(1)
+      if localPlayer.Character:FindFirstChild("Humanoid") and (localPlayer.Character:FindFirstChild("HumanoidRootPart")) and (localPlayer.Character.HumanoidRootPart:FindFirstChild("EffectsSY")) then
+      localPlayer.Character.HumanoidRootPart.EffectsSY:Destroy()
+    end
+    ;
+    wait(0.5)
+    game.Players.LocalPlayer.Character.Humanoid.Jump = true
+    wait(1)
+    localPlayer.Character.HumanoidRootPart.CFrame = localPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0, 10, 0)
+    return
+  end
+  ;
+  local Z = 275
+    if localPlayer.Character:FindFirstChild("HumanoidRootPart") then
+    local n = localPlayer.Character.Humanoid.Health / localPlayer.Character.Humanoid.MaxHealth
+      if n < 0.4 then
+      h = true
+      else
+      local M = localPlayer.Character.Humanoid.Health / localPlayer.Character.Humanoid.MaxHealth
+        if M > 0.6 then
+        h = false
+      end
+      ;
+    end
+    ;
+      if (X - f).Magnitude <= 3 and not W and not h and not getgenv().ReadyToDodge then
+      getgenv().noclip = true
+        if getgenv().Tween then
+        getgenv().Tween:Pause()
+        getgenv().Tween:Cancel()
+      end
+      ;
+      localPlayer.Character.HumanoidRootPart.CFrame = o
+      else
+      local tweenSpeed = tonumber(settings["Speed Tween "]) or Z or 275
+        if game.Players.LocalPlayer.Character:FindFirstChild("Humanoid") and localPlayer.Character.Humanoid.Health > 0 then
+        n = CFrame.new(0, 0, 0)
+          if not P then
+          n = getgenv().ReadyToDodge and CFrame.new(0, 200, 0) or n
+            if h then
+            local detectLev = getgenv().DetectLeviathan
+            local levTarget = nil
+            local sb = game.workspace:FindFirstChild("SeaBeasts")
+            if sb and detectLev then
+              levTarget = detectLev(sb, 2) or detectLev(sb, 3) or detectLev(sb, 4) or detectLev(sb)
+            end
+            local frozenDim = game.workspace._WorldOrigin.Locations:FindFirstChild("Frozen Dimension")
+            local hh = levTarget or frozenDim
+            local ff = settings["Select Owner Boat Beast Hunter"]
+              if hh and not (type(ff) == "string" and ff ~= "" and string.lower(localPlayer.Name) == string.lower(ff)) and ff and ff ~= "" then
+              local ownerPlr = game.Players:FindFirstChild(ff)
+              local ownerHrp = ownerPlr and ownerPlr.Character and (ownerPlr.Character:FindFirstChild("HumanoidRootPart"))
+                if ownerHrp then
+                local posX, posP = localPlayer.Character.HumanoidRootPart.Position, ownerHrp.Position
+                local dir = Vector3.new(posX.X - posP.X, 0, posX.Z - posP.Z)
+                local unit = dir.Magnitude > 0.5 and dir.Unit or (Vector3.new(1, 0, 0))
+                local escape = Vector3.new(posP.X + unit.X * 300, 0, posP.Z + unit.Z * 300)
+                n = (CFrame.new(escape.X - o.Position.X, 800, escape.Z - o.Position.Z))
+                else
+                n = (CFrame.new(0, 800, 0))
+              end
+              ;
+              else
+              n = (CFrame.new(0, 800, 0))
+            end
+            ;
+          end
+          ;
+        end
+        ;
+          if (Vector3.new(0, localPlayer.Character:FindFirstChild("HumanoidRootPart").Position.Y, 0) - Vector3.new(0, -60, 0)).Magnitude <= 60 then
+          localPlayer.Character.HumanoidRootPart.CFrame = localPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0)
+        end
+        ;
+          StartBFMainTween(localPlayer.Character.HumanoidRootPart, o * n, tweenSpeed, 3)
+        getgenv().noclip = true
+      end
+      ;
+    end
+    ;
+  end
+  ;
+end
 ;
-getgenv().caiconcac = toTarget;
-getgenv().StartBFMainTween = StartBFMainTween;
-getgenv().BackupTween = toTarget;
+getgenv().caiconcac = toTarget
+getgenv().StartBFMainTween = StartBFMainTween
+getgenv().BackupTween = toTarget
 
   local StatusSpyParagraph = z.TabHunt:AddParagraph({
   Title = "Status SPY",
@@ -681,11 +661,7 @@ getgenv().BackupTween = toTarget;
     if enabled then
       for _, atmosphere in ipairs(LightingService:GetDescendants()) do
         if atmosphere:IsA("Atmosphere") and not noFogAtmosphereValues[atmosphere] then
-          noFogAtmosphereValues[atmosphere] = {
-            Density = atmosphere.Density,
-            Haze = atmosphere.Haze,
-            Glare = atmosphere.Glare,
-          }
+          noFogAtmosphereValues[atmosphere] = { Density = atmosphere.Density, Haze = atmosphere.Haze, Glare = atmosphere.Glare }
           atmosphere.Density = 0
           atmosphere.Haze = 0
           atmosphere.Glare = 0
@@ -720,7 +696,6 @@ getgenv().BackupTween = toTarget;
 getgenv().GetChests = function()
   local nearestDistance = math.huge
   local nearestChest
-
   for _, chest in next, game:GetService("CollectionService"):GetTagged("_ChestTagged") do
     if #getgenv().Chests < 10 then
       local distance = game:GetService("Players").LocalPlayer:DistanceFromCharacter(chest.Position)
@@ -766,20 +741,16 @@ do
     local VirtualUserLocal = game:GetService("VirtualUser")
     local localPlayer = Players.LocalPlayer
     local Settings = settings
-    local CommF = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("CommF_")
+    local CommF = ReplicatedStorage:WaitForChild("Remotes", 15)
+    CommF = CommF and CommF:WaitForChild("CommF_", 15)
+    if not CommF then warn("[Kaitun] CommF_ not found") return end
     local workers = {}
     local lastStatus = ""
 
-    local gachaRF
     local function getGachaRF()
-      if gachaRF and gachaRF.Parent then return gachaRF end
-      local ok, mod = pcall(function()
-        local net = ReplicatedStorage:WaitForChild("Modules", 10)
-        net = net and net:WaitForChild("Net", 10)
-        return net and net:FindFirstChild("RF/GachaNetworkRF")
-      end)
-      if ok and mod then gachaRF = mod end
-      return gachaRF
+      local Modules = ReplicatedStorage:FindFirstChild("Modules")
+      local Net = Modules and Modules:FindFirstChild("Net")
+      return Net and Net:FindFirstChild("RF/GachaNetworkRF")
     end
 
     local materialNames = {
@@ -851,8 +822,7 @@ do
     local function DetectItemPlr(itemName)
         local character = getCharacter()
         local backpack = localPlayer:FindFirstChildOfClass("Backpack") or localPlayer:FindFirstChild("Backpack")
-        return (character and character:FindFirstChild(itemName) ~= nil)
-            or (backpack and backpack:FindFirstChild(itemName) ~= nil) or false
+        return (character and character:FindFirstChild(itemName) ~= nil) or (backpack and backpack:FindFirstChild(itemName) ~= nil) or false
     end
 
     local function NameWeapon(toolTip, returnTool)
@@ -888,9 +858,7 @@ do
         if not root or not playerRoot then return end
         if (playerRoot.Position - root.Position).Magnitude > 70 then return end
         for _, part in ipairs(model:GetDescendants()) do
-            if part:IsA("BasePart") and part.CanCollide then
-                part.CanCollide = false
-            end
+            if part:IsA("BasePart") and part.CanCollide then part.CanCollide = false end
         end
     end
 
@@ -904,9 +872,7 @@ do
             if matches and IsMobAlive(model) then
                 local root = model:FindFirstChild("HumanoidRootPart") or model:FindFirstChild("RootPart")
                 local distance = (root.Position - playerRoot.Position).Magnitude
-                if not bestDistance or distance < bestDistance then
-                    best, bestDistance = model, distance
-                end
+                if not bestDistance or distance < bestDistance then best, bestDistance = model, distance end
             end
         end
         return best
@@ -923,36 +889,27 @@ do
         return matchIn(ReplicatedStorage) or matchIn(Workspace:FindFirstChild("Enemies"))
     end
 
-    getgenv().DetectLeviathan = function(container, segmentId)
+    local function DetectLeviathan(container, segmentId)
         container = container or Workspace:FindFirstChild("SeaBeasts")
         if not container then return nil end
         local children = container:GetChildren()
         for _, entity in ipairs(children) do
             local health = entity:FindFirstChild("Health")
-            if entity.Name == "Leviathan Tail" and entity:GetAttribute("HealthEnabled") and health and health.Value > 0 then
-                return entity
-            end
+            if entity.Name == "Leviathan Tail" and entity:GetAttribute("HealthEnabled") and health and health.Value > 0 then return entity end
         end
         for _, entity in ipairs(children) do
             local health = entity:FindFirstChild("Health")
-            if entity.Name == "Leviathan" and not entity:GetAttribute("Armored") and health and health.Value > 0 then
-                return entity
-            end
+            if entity.Name == "Leviathan" and not entity:GetAttribute("Armored") and health and health.Value > 0 then return entity end
         end
         if segmentId ~= nil then
             for _, entity in ipairs(children) do
                 local health = entity:FindFirstChild("Health")
-                if entity.Name == "Leviathan Segment" and entity:GetAttribute("SegmentId") == segmentId and health and health.Value > 0 then
-                    return entity
-                end
+                if entity.Name == "Leviathan Segment" and entity:GetAttribute("SegmentId") == segmentId and health and health.Value > 0 then return entity end
             end
         end
         return nil
     end
-
-    local function DetectLeviathan(container, segmentId)
-        return getgenv().DetectLeviathan(container, segmentId)
-    end
+    getgenv().DetectLeviathan = DetectLeviathan
 
     local function getSeaBeasts() return Workspace:FindFirstChild("SeaBeasts") end
     local function getFrozenDimension()
@@ -974,13 +931,9 @@ do
         local character = getCharacter()
         local root = getRoot(character)
         if not root then return false end
-        if (root.Position - target.Position).Magnitude <= 7 then
-            return true
-        end
+        if (root.Position - target.Position).Magnitude <= 7 then return true end
         if type(toTarget) == "function" then
-            local ok = pcall(function()
-                toTarget(root.Position, target.Position, target, false, false)
-            end)
+            local ok = pcall(function() toTarget(root.Position, target.Position, target, false, false) end)
             if ok then return true end
         end
         pcall(function() root.CFrame = target end)
@@ -994,32 +947,23 @@ do
         local distance = (seat.Position - target.Position).Magnitude
         if distance <= 20 then
             local previousState = getgenv().__KaitunBoatTweenState
-            if previousState and previousState.tween then
-                pcall(function() previousState.tween:Cancel() end)
-            end
+            if previousState and previousState.tween then pcall(function() previousState.tween:Cancel() end) end
             getgenv().__KaitunBoatTweenState = nil
             getgenv().TweenBoat = nil
             return true
         end
-
         local activeState = getgenv().__KaitunBoatTweenState
         if activeState and activeState.seat == seat and activeState.tween
             and activeState.tween.PlaybackState == Enum.PlaybackState.Playing
             and activeState.target and (activeState.target.Position - target.Position).Magnitude <= 15 then
             return true
         end
-        if activeState and activeState.tween then
-            pcall(function() activeState.tween:Cancel() end)
-        elseif getgenv().TweenBoat then
-            pcall(function() getgenv().TweenBoat:Cancel() end)
-        end
-
+        if activeState and activeState.tween then pcall(function() activeState.tween:Cancel() end) end
         local tweenSpeed = math.max(tonumber(speed) or tonumber(Settings["Input Speed Boat Auto Drive"]) or 250, 50)
         local ok, tween = pcall(function()
             return TweenService:Create(seat, TweenInfo.new(distance / tweenSpeed, Enum.EasingStyle.Linear), {CFrame = target})
         end)
         if not ok or not tween then return false end
-
         local state = {seat = seat, target = target, tween = tween}
         getgenv().__KaitunBoatTweenState = state
         getgenv().TweenBoat = tween
@@ -1065,9 +1009,7 @@ do
             local mine = owner and string.lower(owner) == string.lower(localPlayer.Name)
             if seat and (ownerMatch or (not ownerName and mine)) then
                 local distance = characterRoot and (seat.Position - characterRoot.Position).Magnitude or math.huge
-                if not selectedDistance or distance < selectedDistance then
-                    selected, selectedDistance = boat, distance
-                end
+                if not selectedDistance or distance < selectedDistance then selected, selectedDistance = boat, distance end
             end
         end
         return selected
@@ -1098,9 +1040,7 @@ do
                 elseif chest:IsA("Model") then position = chest:GetPivot().Position end
                 if position then
                     local distance = (position - playerRoot.Position).Magnitude
-                    if not nearestDistance or distance < nearestDistance then
-                        nearest, nearestDistance = chest, distance
-                    end
+                    if not nearestDistance or distance < nearestDistance then nearest, nearestDistance = chest, distance end
                 end
             end
         end
@@ -1113,9 +1053,7 @@ do
         local pirates = playerSpawns and playerSpawns:FindFirstChild("Pirates")
         if not pirates then return nil end
         for _, spawnModel in ipairs(pirates:GetChildren()) do
-            if spawnModel:IsA("Model") and spawnModel:FindFirstChild("Part") and not spawnModel:FindFirstChild("Ignored") then
-                return spawnModel
-            end
+            if spawnModel:IsA("Model") and spawnModel:FindFirstChild("Part") and not spawnModel:FindFirstChild("Ignored") then return spawnModel end
         end
         return nil
     end
@@ -1130,9 +1068,7 @@ do
     local function invokeInteraction(instance)
         if not instance then return false end
         local prompt = instance:FindFirstChildWhichIsA("ProximityPrompt", true)
-        if prompt and typeof(fireproximityprompt) == "function" then
-            return pcall(fireproximityprompt, prompt)
-        end
+        if prompt and typeof(fireproximityprompt) == "function" then return pcall(fireproximityprompt, prompt) end
         if typeof(firetouchinterest) == "function" then
             local root = getRoot()
             local part = instance:IsA("BasePart") and instance or instance:FindFirstChildWhichIsA("BasePart", true)
@@ -1153,11 +1089,12 @@ do
         local root = getRoot()
         local purchasePoint = CFrame.new(-16204.081, 9.086, 479.226)
         if root and (root.Position - purchasePoint.Position).Magnitude > 12 then
+            safeStatus("Moving to buy boat", G.Colors.Yellow)
             MoveToCFrame(purchasePoint)
-            safeStatus("Moving to buy boat", G.Colors and G.Colors.Yellow)
             return nil
         end
         local remoteName = boatName == "Brigade" and "PirateBrigade" or boatName
+        safeStatus("Buying " .. boatName, G.Colors.Yellow)
         invokeCommF("BuyBoat", remoteName)
         task.wait(2)
         return checkboat()
@@ -1166,13 +1103,9 @@ do
     local function DistanceFindLeviathan()
         local root = getRoot()
         local dangerDistance
-        pcall(function()
-            dangerDistance = require(ReplicatedStorage:WaitForChild("DangerDistance"))
-        end)
+        pcall(function() dangerDistance = require(ReplicatedStorage:WaitForChild("DangerDistance")) end)
         if not root or not dangerDistance or type(dangerDistance.GetNearestNPC) ~= "function" then return math.huge end
-        local ok, info = pcall(function()
-            return dangerDistance:GetNearestNPC(root.Position, 2600)
-        end)
+        local ok, info = pcall(function() return dangerDistance:GetNearestNPC(root.Position, 2600) end)
         if not ok or type(info) ~= "table" or not info[1] then return math.huge end
         local distance
         pcall(function() distance = dangerDistance:GetDistance(info[1]) end)
@@ -1210,7 +1143,7 @@ do
         local inside = heart:FindFirstChild("Inside")
         if not inside then return false end
         if inside:GetAttribute("Harpooned") then
-            safeStatus("Leviathan heart harpooned", G.Colors and G.Colors.Green)
+            safeStatus("Heart already harpooned", G.Colors.Green)
             return true
         end
         local boat = checkboatBeastHunter()
@@ -1219,6 +1152,7 @@ do
         local cube = heart:FindFirstChild("Cube")
         local seat = boat:FindFirstChild("VehicleSeat", true)
         if cube and seat then
+            safeStatus("Sailing to heart", G.Colors.Yellow)
             local target = CFrame.new(cube.Position.X, seat.Position.Y, cube.Position.Z) * CFrame.new(0, 0, 300)
             MoveBoatToCFrame(boat, target, tonumber(Settings["Input Speed Boat Auto Drive"]) or 150)
         end
@@ -1229,10 +1163,11 @@ do
             pcall(function()
                 CommF:InvokeServer("FireHarpoon", math.pi / 4, 0.00044342573293783646, harpoon, Workspace:GetServerTimeNow())
             end)
-            safeStatus("Firing Leviathan heart", G.Colors and G.Colors.Yellow)
+            safeStatus("Firing heart harpoon", G.Colors.Yellow)
             return true
         end
         if seat and not (humanoid and humanoid.Sit) then
+            safeStatus("Boarding harpoon seat", G.Colors.Yellow)
             MoveToCFrame(seat.CFrame)
         else
             local harpoon = boat:FindFirstChild("Harpoon", true)
@@ -1265,22 +1200,16 @@ do
                 end
             end
         end
-        if not best then
-            local module = ReplicatedStorage:FindFirstChild("HydraIslandClient", true)
-            if module and module:IsA("RemoteFunction") then
-                pcall(function() module:InvokeServer("Interact") end)
-                return true
-            end
-            return false
-        end
+        if not best then return false end
         if bestDistance and bestDistance > 12 then
+            safeStatus("Moving to torch", G.Colors.Yellow)
             MoveToCFrame(CFrame.new(getPartPosition(best)))
         else
+            safeStatus("Lighting torch", G.Colors.Yellow)
             invokeInteraction(best)
             local module = ReplicatedStorage:FindFirstChild("HydraIslandClient", true)
             if module and module:IsA("RemoteFunction") then pcall(function() module:InvokeServer("Interact", best) end) end
         end
-        safeStatus("Lighting Hydra torch", G.Colors and G.Colors.Yellow)
         return true
     end
 
@@ -1291,14 +1220,12 @@ do
         if chest then
             local position = getPartPosition(chest)
             if position and distance and distance > 9 then
+                safeStatus("Moving to chest", G.Colors.Yellow)
                 MoveToCFrame(CFrame.new(position + Vector3.new(0, 3, 0)))
-                safeStatus("Collecting chest", G.Colors and G.Colors.Yellow)
             elseif position then
+                safeStatus("Collecting chest", G.Colors.Yellow)
                 local interacted = invokeInteraction(chest)
-                if not interacted then
-                    safeStatus("Chest interaction failed; retrying", G.Colors and G.Colors.Yellow)
-                    return
-                end
+                if not interacted then return end
                 getgenv().ChestsCollected += 1
                 local ignored = Instance.new("BoolValue")
                 ignored.Name = "Ignored"
@@ -1306,6 +1233,7 @@ do
                 if getgenv().ChestsCollected >= target then
                     getgenv().ChestsCollected = 0
                     getgenv().Chests = {}
+                    safeStatus("Chest limit reached, hopping", G.Colors.Green)
                     local placeId = game.PlaceId
                     local requestFunction = getgenv().ExploitReq
                     if requestFunction and type(requestFunction) == "function" then
@@ -1329,6 +1257,7 @@ do
             end
         else
             getgenv().Chests = {}
+            safeStatus("Searching for chests", G.Colors.White)
             local spawnPoint = PathFindChest()
             local position = getPartPosition(spawnPoint)
             if position then MoveToCFrame(CFrame.new(position + Vector3.new(0, 4, 0))) end
@@ -1341,15 +1270,12 @@ do
             if tool:IsA("Tool") and string.find(tool.Name, "Fruit") and not tool:FindFirstChild("Ignored") then
                 local baseName = string.gsub(tool.Name, " Fruit", "")
                 local fruitKey = tool:GetAttribute("OriginalName") or (baseName .. "-" .. baseName)
-                local ok, result = pcall(function()
-                    return CommF:InvokeServer("StoreFruit", fruitKey, tool)
-                end)
+                local ok, result = pcall(function() return CommF:InvokeServer("StoreFruit", fruitKey, tool) end)
                 if ok and result ~= false then
+                    safeStatus("Stored fruit: " .. tostring(tool.Name), G.Colors.Green)
                     local ignored = Instance.new("BoolValue")
                     ignored.Name = "Ignored"
                     ignored.Parent = tool
-                else
-                    safeStatus("Could not store fruit: " .. tostring(tool.Name), G.Colors and G.Colors.Red)
                 end
                 task.wait(1)
             end
@@ -1358,9 +1284,8 @@ do
 
     local function AutoStoreFruitStep()
         local backpack = localPlayer:FindFirstChildOfClass("Backpack") or localPlayer:FindFirstChild("Backpack")
-        local character = getCharacter()
         StoreFruit(backpack)
-        StoreFruit(character)
+        StoreFruit(getCharacter())
     end
 
     local function AutoCraftScrollStep()
@@ -1370,19 +1295,13 @@ do
         local inventory = localPlayer:FindFirstChild("Data")
         local level = inventory and inventory:FindFirstChild("Level")
         if level and level.Value < 100 then return end
-        local ok, result = pcall(function()
-            return CommF:InvokeServer("Craft", "Scroll", rarity)
-        end)
-        if ok and result ~= false then
-            safeStatus("Crafting " .. rarity .. " scroll", G.Colors and G.Colors.Green)
-        end
+        local ok, result = pcall(function() return CommF:InvokeServer("Craft", "Scroll", rarity) end)
+        if ok and result ~= false then safeStatus("Crafting " .. rarity .. " scroll", G.Colors.Green) end
     end
 
     local function getMaterialTarget()
         local preferred = Settings["Select Material Sanguine Art"]
-        if type(preferred) == "string" and materialNames[preferred] then
-            return preferred, materialNames[preferred]
-        end
+        if type(preferred) == "string" and materialNames[preferred] then return preferred, materialNames[preferred] end
         for material, mobs in pairs(materialNames) do
             if not DetectItemPlr(material) then return material, mobs end
         end
@@ -1398,27 +1317,31 @@ do
             local root = target:FindFirstChild("HumanoidRootPart") or target:FindFirstChild("RootPart")
             if root then
                 sizepart(target)
+                safeStatus("Farming " .. material, G.Colors.Yellow)
                 MoveToCFrame(root.CFrame * CFrame.new(0, 15, 5))
                 aimAtEntity(target)
-                safeStatus("Farming " .. material, G.Colors and G.Colors.Yellow)
             end
         else
-            safeStatus("Searching for " .. material, G.Colors and G.Colors.White)
+            safeStatus("Searching for " .. material, G.Colors.White)
         end
         local count = invokeCommF("CheckCountItem", material)
         if tonumber(count) and tonumber(count) > 0 and material == "Leviathan Scale" then
+            safeStatus("Buying Sanguine Art", G.Colors.Green)
             pcall(function() CommF:InvokeServer("BuySanguineArt") end)
         end
     end
 
     local function RandomDevilFruitStep()
-        local rf = getGachaRF()
-        if not rf then return end
+        local GachaRF = getGachaRF()
+        if not GachaRF then
+            safeStatus("Gacha remote not found", G.Colors.Red)
+            return
+        end
         local ok = pcall(function()
-            rf:InvokeServer({Context = "Purchase", BoxName = "ZiolesGacha"})
+            GachaRF:InvokeServer({Context = "Purchase", BoxName = "ZiolesGacha"})
         end)
         if ok then
-            safeStatus("Bought random fruit (Zioles Gacha)", G.Colors and G.Colors.Green)
+            safeStatus("Buying random fruit (Gacha)", G.Colors.Green)
         end
     end
 
@@ -1427,10 +1350,10 @@ do
         local hasFishTail = DetectItemPlr("Fish Tail")
         local hasMysticDroplet = DetectItemPlr("Mystic Droplet")
         if hasWaterKey or (hasFishTail and hasMysticDroplet) then
-            local result = invokeCommF("BuySharkmanKarate")
-            if result then safeStatus("Buying Sharkman Karate", G.Colors and G.Colors.Green) end
+            safeStatus("Buying Sharkman Karate", G.Colors.Green)
+            invokeCommF("BuySharkmanKarate")
         else
-            safeStatus("Need Sharkman Karate materials", G.Colors and G.Colors.White)
+            safeStatus("Need Sharkman materials", G.Colors.White)
         end
     end
 
@@ -1441,9 +1364,9 @@ do
         local root = getRoot()
         local seat = boat:FindFirstChild("VehicleSeat", true)
         if not root or not seat then return end
+        safeStatus("Driving boat to Tiki", G.Colors.Yellow)
         local target = CFrame.new(-16204.081, seat.Position.Y, 479.226)
         if not getHumanoid() or not getHumanoid().Sit then MoveToCFrame(seat.CFrame) else MoveBoatToCFrame(boat, target, Settings["Input Speed Boat Auto Drive"]) end
-        safeStatus("Driving boat to Tiki", G.Colors and G.Colors.Yellow)
     end
 
     local function DriveBoatToHydraStep()
@@ -1452,9 +1375,8 @@ do
         NoclipBoat(boat)
         local seat = boat:FindFirstChild("VehicleSeat", true)
         if not seat then return end
-        local target = CFrame.new(-32975.992, seat.Position.Y, 25963.711)
-        MoveBoatToCFrame(boat, target, Settings["Input Speed Boat Auto Drive"])
-        safeStatus("Driving boat to Hydra", G.Colors and G.Colors.Yellow)
+        safeStatus("Driving boat to Hydra", G.Colors.Yellow)
+        MoveBoatToCFrame(boat, CFrame.new(-32975.992, seat.Position.Y, 25963.711), Settings["Input Speed Boat Auto Drive"])
     end
 
     local function HuntLeviathanStep()
@@ -1471,6 +1393,7 @@ do
         local leviathan = seaBeasts and (DetectLeviathan(seaBeasts, 2) or DetectLeviathan(seaBeasts, 3) or DetectLeviathan(seaBeasts, 4) or DetectLeviathan(seaBeasts))
         if leviathan then
             getgenv().RespawnLeviathan = false
+            safeStatus("Attacking Leviathan", G.Colors.Green)
             local boat = checkboatBeastHunter()
             local hum = getHumanoid(character)
             if boat then NoclipBoat(boat) end
@@ -1483,15 +1406,14 @@ do
                     aimAtEntity(leviathan)
                 end
             end
-            safeStatus("Attacking Leviathan", G.Colors and G.Colors.Green)
             return
         end
         if frozen then
             getgenv().RespawnLeviathan = false
+            safeStatus("Frozen Dimension found", G.Colors.Yellow)
             local locationPart = frozen:IsA("BasePart") and frozen or frozen:FindFirstChildWhichIsA("BasePart", true)
             if locationPart then MoveToCFrame(locationPart.CFrame) end
             if Settings["Auto light the torch"] then AutoLightTorch() end
-            safeStatus("Frozen Dimension found", G.Colors and G.Colors.Yellow)
             return
         end
         getgenv().RespawnLeviathan = true
@@ -1502,7 +1424,7 @@ do
             else
                 DriveBoatToTikiStep()
             end
-            safeStatus("Waiting for boat", G.Colors and G.Colors.White)
+            safeStatus("Waiting for boat", G.Colors.White)
             return
         end
         local seat = boat:FindFirstChild("VehicleSeat", true)
@@ -1510,12 +1432,15 @@ do
             NoclipBoat(boat)
             local distance = (seat.Position - Vector3.new(-118834.516, seat.Position.Y, -78.951)).Magnitude
             if distance > 400 then
+                safeStatus("Sailing to spawn", G.Colors.Yellow)
                 MoveBoatToCFrame(boat, CFrame.new(-118834.516, seat.Position.Y, -78.951), Settings["Input Speed Boat Auto Drive"])
             else
+                safeStatus("Sailing to Hydra", G.Colors.Yellow)
                 MoveBoatToCFrame(boat, CFrame.new(-32975.992, seat.Position.Y, 25963.711), Settings["Input Speed Boat Auto Drive"])
             end
+        else
+            safeStatus("Searching for Leviathan", G.Colors.White)
         end
-        safeStatus("Searching for Leviathan", G.Colors and G.Colors.White)
     end
 
     local webhookNextAllowed = {}
@@ -1526,21 +1451,13 @@ do
         if webhookNextAllowed[webhookKey] and now < webhookNextAllowed[webhookKey] then return false end
         local url = Settings["Input Url Webhook"] or Settings["Url Webhook"]
         local requestFunction = getgenv().ExploitReq or request or http_request
-        if type(url) ~= "string" or not string.find(url, "discord.com/api/webhooks", 1, true) or type(requestFunction) ~= "function" then
-            return false
-        end
+        if type(url) ~= "string" or not string.find(url, "discord.com/api/webhooks", 1, true) or type(requestFunction) ~= "function" then return false end
         local payload = {
             username = "Kaitun Leviathan",
             content = tostring(Settings["Input Discord Ping"] or ""),
-            embeds = {{
-                title = tostring(title or "Kaitun Leviathan"),
-                description = tostring(description or ""),
-                color = 16766720,
-                timestamp = DateTime.now():ToIsoDate(),
-                footer = {text = "Kaitun Leviathan"}
-            }}
+            embeds = {{ title = tostring(title or "Kaitun Leviathan"), description = tostring(description or ""), color = 16766720, timestamp = DateTime.now():ToIsoDate(), footer = {text = "Kaitun Leviathan"} }}
         }
-        local ok, response = pcall(function()
+        local ok = pcall(function()
             return requestFunction({Url = url, Method = "POST", Headers = { ["Content-Type"] = "application/json" }, Body = HttpServiceLocal:JSONEncode(payload)})
         end)
         if not ok then return false end
@@ -1572,9 +1489,7 @@ do
         task.spawn(function()
             while Settings[name] do
                 local ok = pcall(callback)
-                if not ok then
-                    safeStatus(name .. " retrying", G.Colors and G.Colors.Red)
-                end
+                if not ok then safeStatus(name .. " error", G.Colors.Red) end
                 task.wait(interval or 0.25)
             end
             workers[name] = nil
@@ -1583,49 +1498,24 @@ do
 
     local function toggleWorker(tab, key, title, callback, interval, description)
         local defaultValue = Settings[key] == true
-        tab:AddToggle(key, {
-            Title = title or key,
-            Description = description,
-            Default = defaultValue,
-            Callback = function(value)
-                saveSetting(key, value)
-                if value then
-                    workerLoop(key, callback, interval)
-                else
-                    safeStatus("Idle", G.Colors and G.Colors.White)
-                end
-            end
-        })
+        tab:AddToggle(key, { Title = title or key, Description = description, Default = defaultValue, Callback = function(value)
+            saveSetting(key, value)
+            if value then workerLoop(key, callback, interval) else safeStatus("Idle", G.Colors.White) end
+        end })
         if defaultValue then workerLoop(key, callback, interval) end
     end
 
     local function bindDropdown(tab, key, title, values, multi, defaultValue)
         local initialValue = Settings[key]
-        if initialValue == nil then
-            initialValue = defaultValue
-            if initialValue ~= nil then saveSetting(key, initialValue) end
-        end
-        tab:AddDropdown(key, {
-            Title = title or key,
-            Values = values,
-            Multi = multi == true,
-            Default = initialValue,
-            Callback = function(value) saveSetting(key, value) end
-        })
+        if initialValue == nil then initialValue = defaultValue; if initialValue ~= nil then saveSetting(key, initialValue) end end
+        tab:AddDropdown(key, { Title = title or key, Values = values, Multi = multi == true, Default = initialValue, Callback = function(value) saveSetting(key, value) end })
     end
 
     local function bindInput(tab, key, title, placeholder, defaultValue, numeric)
-        tab:AddInput(key, {
-            Title = title or key,
-            Default = tostring(Settings[key] or defaultValue or ""),
-            Placeholder = placeholder or "",
-            Numeric = numeric == true,
-            Finished = true,
-            Callback = function(value)
-                if numeric then value = tonumber(value) or tonumber(defaultValue) or 0 end
-                saveSetting(key, value)
-            end
-        })
+        tab:AddInput(key, { Title = title or key, Default = tostring(Settings[key] or defaultValue or ""), Placeholder = placeholder or "", Numeric = numeric == true, Finished = true, Callback = function(value)
+            if numeric then value = tonumber(value) or tonumber(defaultValue) or 0 end
+            saveSetting(key, value)
+        end })
     end
 
     local function CheckCountItem(itemName)
@@ -1648,15 +1538,25 @@ do
         local heart = getFrozenHeart()
         local seaBeasts = getSeaBeasts()
         local leviathan = seaBeasts and DetectLeviathan(seaBeasts)
-        return {
-            Player = localPlayer.Name,
-            HasBoat = boat ~= nil,
-            BoatName = boat and boat.Name or "None",
-            FrozenDimension = frozen ~= nil,
-            FrozenHeart = heart ~= nil,
-            Leviathan = leviathan ~= nil,
-            Distance = DistanceFindLeviathan(),
-        }
+        return { Player = localPlayer.Name, HasBoat = boat ~= nil, BoatName = boat and boat.Name or "None", FrozenDimension = frozen ~= nil, FrozenHeart = heart ~= nil, Leviathan = leviathan ~= nil, Distance = DistanceFindLeviathan(), PlaceId = game.PlaceId, JobId = game.JobId }
+    end
+
+    local function getDataValue(data, key)
+        if not data then return "Loading..." end
+        local valueObject
+        local okFind, found = pcall(function() return data:FindFirstChild(key) or data:FindFirstChild(key, true) end)
+        if okFind then valueObject = found end
+        if not valueObject then
+            local okAttr, attr = pcall(function() return data:GetAttribute(key) end)
+            if okAttr and attr ~= nil then return tostring(attr) end
+            return "N/A"
+        end
+        local okValue, value = pcall(function()
+            if valueObject:IsA("ValueBase") then return valueObject.Value end
+            return valueObject.Value
+        end)
+        if not okValue or value == nil then return "N/A" end
+        return tostring(value)
     end
 
     local function safeStatusRead(callback, fallback)
@@ -1669,20 +1569,21 @@ do
     local statusSpyBusy = false
 
     local function BuildStatusSpyText()
+        local data = safeStatusRead(function() return localPlayer:FindFirstChild("Data") end, nil)
         local boat = safeStatusRead(function() return checkboatBeastHunter() end, nil)
         local frozen = safeStatusRead(function() return getFrozenDimension() end, nil)
         local heart = safeStatusRead(function() return getFrozenHeart() end, nil)
         local seaBeasts = safeStatusRead(function() return getSeaBeasts() end, nil)
         local leviathan = nil
         if seaBeasts then
-            leviathan = safeStatusRead(function()
-                return DetectLeviathan(seaBeasts)
-                    or DetectLeviathan(seaBeasts, 2)
-                    or DetectLeviathan(seaBeasts, 3)
-                    or DetectLeviathan(seaBeasts, 4)
-            end, nil)
+            leviathan = safeStatusRead(function() return DetectLeviathan(seaBeasts) or DetectLeviathan(seaBeasts, 2) or DetectLeviathan(seaBeasts, 3) or DetectLeviathan(seaBeasts, 4) end, nil)
         end
         local distance = safeStatusRead(function() return DistanceFindLeviathan() end, "N/A")
+        local level = getDataValue(data, "Level")
+        local beli = getDataValue(data, "Beli")
+        local fragments = getDataValue(data, "Fragments")
+        local race = getDataValue(data, "Race")
+        local fruit = getDataValue(data, "DevilFruit")
         local boatName = boat and safeStatusRead(function() return boat.Name end, "Boat found") or "None"
         local huntStatus
         if heart then huntStatus = "Frozen Heart available"
@@ -1690,16 +1591,16 @@ do
         elseif frozen then huntStatus = "Frozen Dimension active"
         elseif boat then huntStatus = "Boat ready; searching"
         else huntStatus = "Waiting for boat" end
-
         local lines = {
-            "Player: " .. tostring(localPlayer.Name),
-            "Boat: " .. tostring(boatName),
+            "Player: " .. tostring(localPlayer.Name), "Level: " .. level, "Beli: " .. beli, "Fragments: " .. fragments,
+            "Race: " .. race, "Devil Fruit: " .. fruit, "Boat: " .. tostring(boatName),
             "Frozen Dimension: " .. tostring(frozen ~= nil and frozen ~= false),
             "Leviathan: " .. tostring(leviathan ~= nil and leviathan ~= false),
             "Frozen Heart: " .. tostring(heart ~= nil and heart ~= false),
-            "Distance indicator: " .. tostring(distance),
-            "Hunt status: " .. huntStatus,
+            "Distance indicator: " .. tostring(distance), "Hunt status: " .. huntStatus,
+            "Place ID: " .. tostring(game.PlaceId)
         }
+        if not data then table.insert(lines, 2, "Player data: still loading") end
         return table.concat(lines, "\n")
     end
 
@@ -1707,23 +1608,13 @@ do
         if statusSpyBusy then return true, lastStatusSpyText end
         statusSpyBusy = true
         local okBuild, content = pcall(BuildStatusSpyText)
-        if not okBuild then
-            content = "Status SPY could not read the game state.\n" .. tostring(content)
-        end
+        if not okBuild then content = "Status SPY error: " .. tostring(content) end
         content = tostring(content or "Status unavailable")
-        local okUpdate, updateError = pcall(function()
-            if not StatusSpyParagraph then error("Status SPY paragraph not created") end
-            if type(StatusSpyParagraph.SetDesc) == "function" then
-                StatusSpyParagraph:SetDesc(content)
-            elseif type(StatusSpyParagraph.SetContent) == "function" then
-                StatusSpyParagraph:SetContent(content)
-            else
-                error("Fluent paragraph does not expose SetDesc/SetContent")
-            end
+        local okUpdate = pcall(function()
+            if not StatusSpyParagraph then error("no paragraph") end
+            if type(StatusSpyParagraph.SetDesc) == "function" then StatusSpyParagraph:SetDesc(content)
+            elseif type(StatusSpyParagraph.SetContent) == "function" then StatusSpyParagraph:SetContent(content) end
         end)
-        if not okUpdate then
-            content = content .. "\n(UI update error: " .. tostring(updateError) .. ")"
-        end
         lastStatusSpyText = content
         statusSpyBusy = false
         return okBuild and okUpdate, content
@@ -1734,14 +1625,8 @@ do
         local hasMultiSelection = type(selected) == "table" and next(selected) ~= nil
         if not hasMultiSelection then
             local singleSelected = Settings["Select Sea Event"]
-            if type(singleSelected) == "string" and singleSelected ~= "" then
-                selected = {singleSelected}
-            else
-                selected = {"SeaBeast"}
-            end
-        elseif type(selected) ~= "table" then
-            selected = {selected}
-        end
+            if type(singleSelected) == "string" and singleSelected ~= "" then selected = {singleSelected} else selected = {"SeaBeast"} end
+        elseif type(selected) ~= "table" then selected = {selected} end
         local function enabled(key)
             if forceAll then return true end
             if selected[key] == true then return true end
@@ -1755,18 +1640,9 @@ do
                 if enemy.Name == "SeaBeast1" and root then return enemy end
             end
         end
-        if enabled("Terrorshark") then
-            local terror = CheckNameBoss("Terrorshark")
-            if terror then return terror end
-        end
-        if enabled("Shark") then
-            local shark = DetectMob({"Shark", "Piranha"})
-            if shark then return shark end
-        end
-        if enabled("Piranha") then
-            local piranha = DetectMob("Piranha")
-            if piranha then return piranha end
-        end
+        if enabled("Terrorshark") then local t = CheckNameBoss("Terrorshark"); if t then return t end end
+        if enabled("Shark") then local s = DetectMob({"Shark", "Piranha"}); if s then return s end end
+        if enabled("Piranha") then local p = DetectMob("Piranha"); if p then return p end end
         return false
     end
 
@@ -1787,9 +1663,7 @@ do
                 task.wait(0.05)
                 VirtualUserLocal:Button1Up(Vector2.new(0, 0), Workspace.CurrentCamera.CFrame)
             end)
-        elseif type(mouse1click) == "function" then
-            pcall(mouse1click)
-        end
+        elseif type(mouse1click) == "function" then pcall(mouse1click) end
     end
 
     local function AutoAllSkill()
@@ -1797,15 +1671,9 @@ do
         skillGui = skillGui and skillGui:FindFirstChild("Main")
         skillGui = skillGui and skillGui:FindFirstChild("Skills")
         if not skillGui then return false end
-        local equippedTools = {
-            NameWeapon("Melee", true), NameWeapon("Sword", true),
-            NameWeapon("Gun", true), NameWeapon("Blox Fruit", true)
-        }
+        local equippedTools = { NameWeapon("Melee", true), NameWeapon("Sword", true), NameWeapon("Gun", true), NameWeapon("Blox Fruit", true) }
         for _, tool in ipairs(equippedTools) do
-            if tool and not skillGui:FindFirstChild(tool.Name) then
-                equiptool(tool.Name)
-                return false
-            end
+            if tool and not skillGui:FindFirstChild(tool.Name) then equiptool(tool.Name); return false end
             if tool then
                 local selected = Settings["Select Skills " .. tool.ToolTip]
                 local keys = {}
@@ -1840,6 +1708,7 @@ do
         for _, item in ipairs(map:GetDescendants()) do
             local name = string.lower(item.Name)
             if string.find(name, "leviathan") and string.find(name, "gate") then
+                safeStatus("Opening Leviathan Gate", G.Colors.Yellow)
                 local root = getRoot()
                 local position = getPartPosition(item)
                 if root and position and (root.Position - position).Magnitude > 12 then
@@ -1856,10 +1725,11 @@ do
 
     local function AttackSeaEvent()
         local target = DetectSeaEvents(false)
-        if not target then return false end
+        if not target then safeStatus("No sea event found", G.Colors.White); return false end
         local root = target:FindFirstChild("HumanoidRootPart") or target:FindFirstChild("Engine") or target:FindFirstChild("RootPart")
         if not root then return false end
         sizepart(target)
+        safeStatus("Attacking " .. target.Name, G.Colors.Green)
         getgenv().AimPos = root.CFrame
         MoveToCFrame(root.CFrame * CFrame.new(0, 15, 5))
         AutoAllSkill()
@@ -1874,32 +1744,21 @@ do
                     pcall(function() remote:FireServer(target, true) end)
                 end
             end
-        else
-            ClickM1()
-        end
+        else ClickM1() end
         return true
     end
 
     local function DestroyIDKStep()
-        if not Settings["Destroy IDK only Owner Boat"] then
-            getgenv().DesIdk = false
-            getgenv().WebhookIDK = false
-            return
-        end
+        if not Settings["Destroy IDK only Owner Boat"] then return end
         local boats = Workspace:FindFirstChild("Boats")
-        if not boats then
-            getgenv().DesIdk = false
-            getgenv().WebhookIDK = false
-            return
-        end
+        if not boats then return end
         for _, boat in ipairs(boats:GetChildren()) do
             if string.find(string.lower(boat.Name), "idk") then
                 local owner = getBoatOwner(boat)
                 if owner and string.lower(owner) == string.lower(localPlayer.Name) then
+                    safeStatus("Destroying IDK boat", G.Colors.Yellow)
                     local event = boat:FindFirstChild("RemoteEvent", true)
-                    if event and event:IsA("RemoteEvent") then
-                        pcall(function() event:FireServer("Destroy") end)
-                    end
+                    if event and event:IsA("RemoteEvent") then pcall(function() event:FireServer("Destroy") end) end
                     getgenv().OldBoat = boat
                     getgenv().DesIdk = true
                     getgenv().WebhookIDK = true
@@ -1907,8 +1766,6 @@ do
                 end
             end
         end
-        getgenv().DesIdk = false
-        getgenv().WebhookIDK = false
     end
 
     local function BoostFPS(enabled)
@@ -1921,10 +1778,47 @@ do
     end
 
     getgenv().CheckCountItem = CheckCountItem
+    getgenv().GetPlayerNears = function(radius)
+        local root = getRoot(); local results = {}
+        if not root then return results end
+        radius = tonumber(radius) or 1200
+        for _, player in ipairs(Players:GetPlayers()) do
+            if player ~= localPlayer then
+                local otherRoot = getRoot(player.Character)
+                if otherRoot then
+                    local distance = (otherRoot.Position - root.Position).Magnitude
+                    if distance <= radius then table.insert(results, {Player = player, Distance = distance, Root = otherRoot}) end
+                end
+            end
+        end
+        table.sort(results, function(a, b) return a.Distance < b.Distance end)
+        return results
+    end
     getgenv().readStatusAccoountMain = readStatusAccoountMain
-    getgenv().InfoLeviathan = BuildStatusSpyText
+    getgenv().StatusCheckLeviathan = function()
+        local s = readStatusAccoountMain()
+        if s.FrozenHeart then return "Frozen Heart available" end
+        if s.Leviathan then return "Leviathan detected" end
+        if s.FrozenDimension then return "Frozen Dimension active" end
+        if s.HasBoat then return "Boat ready; searching" end
+        return "Waiting for boat"
+    end
+    getgenv().InfoLeviathan = function() return BuildStatusSpyText() end
     getgenv().DetectSeaEvents = DetectSeaEvents
     getgenv().TeleportSeaEvents = TeleportSeaEvents
+    getgenv().UseFruitM1 = function(target, fromBoat)
+        local character = getCharacter(); if not character then return false end
+        local tool = NameWeapon("Blox Fruit", true); if not tool then return false end
+        equiptool(tool.Name)
+        local equipped = character:FindFirstChild(tool.Name)
+        local remote = equipped and equipped:FindFirstChild("LeftClickRemote")
+        if not remote or not remote:IsA("RemoteEvent") then return false end
+        if target then
+            local hitbox = target:FindFirstChild("Hitbox11", true) or target:FindFirstChild("HumanoidRootPart")
+            if hitbox then getgenv().AimPos = hitbox.CFrame end
+        end
+        return pcall(function() remote:FireServer(target, fromBoat == true) end)
+    end
     getgenv().ClickM1 = ClickM1
     getgenv().AutoAllSkill = AutoAllSkill
     getgenv().OpenLeviathanGate = OpenLeviathanGate
@@ -1952,14 +1846,12 @@ do
     getgenv().AutoLightTorch = AutoLightTorch
     getgenv().postWebhook = postWebhook
     getgenv().MoveToCFrame = MoveToCFrame
-    getgenv().getGachaRF = getGachaRF
-    getgenv().RandomDevilFruitStep = RandomDevilFruitStep
 
     toggleWorker(z.TabHunt, "Destroy IDK only Owner Boat", "Destroy IDK only Owner Boat", DestroyIDKStep, 0.5)
     z.TabHunt:AddButton({Title = "Open Leviathan Gate", Callback = function() OpenLeviathanGate() end})
     z.TabHunt:AddButton({Title = "Show Leviathan Information", Callback = function()
         local ok, message = RefreshStatusSpy()
-        safeStatus(ok and "Status refreshed" or "Status refresh failed", G.Colors and G.Colors.Blue)
+        safeStatus(ok and "Status refreshed" or "Status refresh failed", ok and G.Colors.Blue or G.Colors.Red)
         if type(setclipboard) == "function" and ok then pcall(setclipboard, message) end
     end})
     z.TabHunt:AddButton({Title = "Refresh Status SPY", Callback = function()
@@ -1968,21 +1860,14 @@ do
     end})
 
     RefreshStatusSpy()
-    task.spawn(function()
-        while task.wait(5) do RefreshStatusSpy() end
-    end)
+    task.spawn(function() while task.wait(5) do RefreshStatusSpy() end end)
 
-    z.SettingSkillMain:AddToggle("Boost Fps", {
-        Title = "Boost Fps",
-        Default = Settings["Boost Fps"] == true,
-        Callback = function(value)
-            saveSetting("Boost Fps", value)
-            BoostFPS(value)
-        end
-    })
+    z.SettingSkillMain:AddToggle("Boost Fps", { Title = "Boost Fps", Default = Settings["Boost Fps"] == true, Callback = function(value)
+        saveSetting("Boost Fps", value); BoostFPS(value)
+    end })
     pcall(BoostFPS, Settings["Boost Fps"] == true)
 
-    toggleWorker(z.TabHunt, "Start Hunt Leviathan", "Start Hunt Leviathan", HuntLeviathanStep, 0.35)
+    toggleWorker(z.TabHunt, "Start Hunt Leviathan", "Start Hunt Leviathan", HuntLeviathanStep, 0.35, "Search the Frozen Dimension, manage the boat, and attack the Leviathan.")
     toggleWorker(z.TabHunt, "Auto light the torch", "Auto light the torch", AutoLightTorch, 0.7)
     toggleWorker(z.TabHunt, "Shoot Heart When Ice Spike Breaks", "Shoot Heart When Ice Spike Breaks", ShootHeartLeviathan, 0.25)
     toggleWorker(z.TabHunt, "Auto Chest Hop", "Auto Chest Hop", AutoChestHopStep, 0.2)
@@ -1993,20 +1878,16 @@ do
     toggleWorker(z.TabHunt, "Drive Boat To Hydra", "Drive Boat To Hydra", DriveBoatToHydraStep, 0.5)
 
     local ownerOptions = {localPlayer.Name}
-    for _, user in ipairs(Players:GetPlayers()) do
-        if user ~= localPlayer then table.insert(ownerOptions, user.Name) end
-    end
+    for _, user in ipairs(Players:GetPlayers()) do if user ~= localPlayer then table.insert(ownerOptions, user.Name) end end
     bindDropdown(z.TabHunt, "Select Owner Boat Beast Hunter", "Select Owner Boat Beast Hunter", ownerOptions, false, localPlayer.Name)
     bindDropdown(z.TabHunt, "Select Sea Events", "Select Sea Events", {"SeaBeast", "Terrorshark", "Ship", "Shark", "Piranha"}, true, {})
     bindDropdown(z.TabHunt, "Select Rarity Scroll", "Select Rarity Scroll", {"Common", "Rare", "Legendary", "Mythical"}, false, "Common")
-    bindDropdown(z.TabHunt, "Select Material Sanguine Art", "Select Material Sanguine Art", {
-        "Leviathan Scale", "Mutant Tooth", "Terror Eyes", "Shark Tooth", "Electric Wing", "Fool's Gold", "Demonic Wisp", "Vampire Fang"
-    }, false, "Leviathan Scale")
+    bindDropdown(z.TabHunt, "Select Material Sanguine Art", "Select Material Sanguine Art", { "Leviathan Scale", "Mutant Tooth", "Terror Eyes", "Shark Tooth", "Electric Wing", "Fool's Gold", "Demonic Wisp", "Vampire Fang" }, false, "Leviathan Scale")
 
     bindInput(z.TabHunt, "Input Speed Boat Auto Drive", "Input Speed Boat Auto Drive", "250", 250, true)
     bindInput(z.TabHunt, "Value Collect Chest to Hop", "Value Collect Chest to Hop", "10", 10, true)
     bindInput(z.TabHunt, "Value Damage Multi Segments", "Value Damage Multi Segments", "30000", 30000, true)
-    bindInput(z.SettingSkillMain, "Speed Tween ", "Speed Tween", "300", 300, true)
+    bindInput(z.SettingSkillMain, "Speed Tween ", "Speed Tween", "275", 275, true)
     bindInput(z.SettingSkillMain, "holdskill", "Skill Hold Duration", "0.2", 0.2, true)
     bindInput(z.WebhookTab, "Input Url Webhook", "Input Url Webhook", "Discord webhook URL", "", false)
     bindInput(z.WebhookTab, "Input Discord Ping", "Input Discord Ping (Everyone/ID)", "@everyone or Discord ID", "", false)
@@ -2014,9 +1895,8 @@ do
     toggleWorker(z.WebhookTab, "Webhook Find Leviathan", "Webhook Find Leviathan", function()
         local frozen = getFrozenDimension()
         local seaBeasts = getSeaBeasts()
-        local leviathan = seaBeasts and (DetectLeviathan(seaBeasts) or DetectLeviathan(seaBeasts, 2))
-        local active = (frozen ~= nil and frozen ~= false) or (leviathan ~= nil and leviathan ~= false)
-        webhookEdge("find-leviathan", active, function()
+        local leviathan = seaBeasts and (DetectLeviathan(seaBeasts) or DetectLeviathan(seaBeasts, 2) or DetectLeviathan(seaBeasts, 3) or DetectLeviathan(seaBeasts, 4))
+        webhookEdge("find-leviathan", (frozen ~= nil and frozen ~= false) or (leviathan ~= nil and leviathan ~= false), function()
             postWebhook("Leviathan found", frozen and "Frozen Dimension found." or "Leviathan detected in the sea.", "Webhook Find Leviathan")
         end)
     end, 1)
@@ -2024,9 +1904,22 @@ do
     toggleWorker(z.WebhookTab, "Webhook Shoot Heart Leviathan", "Webhook Shoot Heart Leviathan", function()
         local heart = getFrozenHeart()
         local inside = heart and heart:FindFirstChild("Inside")
-        local active = inside ~= nil and inside:GetAttribute("Harpooned") == true
-        webhookEdge("shoot-heart", active, function()
-            postWebhook("Leviathan Heart", "The Leviathan heart is marked as harpooned.", "Webhook Shoot Heart Leviathan")
+        webhookEdge("shoot-heart", inside ~= nil and inside:GetAttribute("Harpooned") == true, function()
+            postWebhook("Leviathan Heart", "Heart harpooned.", "Webhook Shoot Heart Leviathan")
+        end)
+    end, 1)
+
+    toggleWorker(z.WebhookTab, "Webhook Unlock Draco v4", "Webhook Unlock Draco v4", function()
+        local data = localPlayer:FindFirstChild("Data")
+        local raceEnergy = data and data:FindFirstChild("RaceEnergy")
+        webhookEdge("unlock-draco-v4", hasTrueGlobalFlag({"Webhookhavedracov4"}) or (raceEnergy ~= nil and tonumber(raceEnergy.Value) ~= nil and tonumber(raceEnergy.Value) >= 1), function()
+            postWebhook("Draco V4", "Draco V4 signal detected.", "Webhook Unlock Draco v4")
+        end)
+    end, 2)
+
+    toggleWorker(z.WebhookTab, "Webhook Destroy IDK", "Webhook Destroy IDK", function()
+        webhookEdge("destroy-idk", hasTrueGlobalFlag({"WebhookIDK"}) or getgenv().DesIdk == true, function()
+            postWebhook("Boat status", "Destroy IDK signal active.", "Webhook Destroy IDK")
         end)
     end, 1)
 
@@ -2036,49 +1929,40 @@ do
     bindDropdown(z.SettingSkillMain, "Select Skills Gun", "Select Skills Gun", skillList, true, {"Z", "X"})
     bindDropdown(z.SettingSkillMain, "Select Skills Blox Fruit", "Select Skills Blox Fruit", skillList, true, {"Z", "X", "C", "V", "F"})
 
-    for _, settingName in ipairs({
-        "Skill Z Melee", "Skill X Melee", "Skill C Melee", "Skill Z Sword", "Skill X Sword",
-        "Skill Z Gun", "Skill X Gun", "Skill Z Blox Fruit", "Skill X Blox Fruit", "Skill C Blox Fruit",
-        "Skill V Blox Fruit", "Skill F Blox Fruit"
-    }) do
+    for _, settingName in ipairs({ "Skill Z Melee", "Skill X Melee", "Skill C Melee", "Skill Z Sword", "Skill X Sword", "Skill Z Gun", "Skill X Gun", "Skill Z Blox Fruit", "Skill X Blox Fruit", "Skill C Blox Fruit", "Skill V Blox Fruit", "Skill F Blox Fruit" }) do
         local key = settingName
-        z.SettingSkillMain:AddToggle(key, {
-            Title = key,
-            Default = Settings[key] == true,
-            Callback = function(value) saveSetting(key, value) end
-        })
+        z.SettingSkillMain:AddToggle(key, { Title = key, Default = Settings[key] == true, Callback = function(value) saveSetting(key, value) end })
     end
 
-    z.TabDevilFruit:AddParagraph({
-        Title = "Devil Fruit",
-        Content = "Manage fruit storage and purchase random fruits via Zioles Gacha."
-    })
-    toggleWorker(z.TabDevilFruit, "Auto Store Fruit", "Auto Store Fruit", AutoStoreFruitStep, 2)
-    toggleWorker(z.TabDevilFruit, "Random Devil Fruit", "Random Devil Fruit (Zioles Gacha)", RandomDevilFruitStep, 1,
-        "Buys a random fruit from Zioles Gacha every 1 second via RF/GachaNetworkRF.")
-    z.TabDevilFruit:AddButton({Title = "Store Fruits Now", Callback = function() pcall(AutoStoreFruitStep) end})
-    z.TabDevilFruit:AddButton({Title = "Buy Random Now", Callback = function() pcall(RandomDevilFruitStep) end})
+    local function bindWorkerAlias(tab, aliasKey, baseKey, title, callback, interval, description)
+        local defaultValue = Settings[aliasKey] == true or Settings[baseKey] == true
+        tab:AddToggle(aliasKey, { Title = title or aliasKey, Description = description, Default = defaultValue, Callback = function(value)
+            saveSetting(aliasKey, value); saveSetting(baseKey, value)
+            if value then workerLoop(baseKey, callback, interval) end
+        end })
+        if defaultValue then saveSetting(baseKey, true); workerLoop(baseKey, callback, interval) end
+    end
 
-    z.TabHunt:AddParagraph({
-        Title = "Sea Event Controls",
-        Content = "Select event types below, then enable Attack Sea Event."
-    })
+    z.TabDevilFruit:AddParagraph({ Title = "Devil Fruit", Content = "Manage fruit storage and buy Zioles Gacha random." })
+    toggleWorker(z.TabDevilFruit, "Auto Store Fruit", "Auto Store Fruit", AutoStoreFruitStep, 2, "Stores fruit tools in Backpack and Character.")
+    toggleWorker(z.TabDevilFruit, "Random Devil Fruit", "Random Devil Fruit (Zioles Gacha)", RandomDevilFruitStep, 1, "Buys a random fruit via RF/GachaNetworkRF every 1s.")
+
+    z.TabHunt:AddParagraph({ Title = "Sea Event Controls", Content = "Select event types then enable Attack Sea Event." })
     bindDropdown(z.TabHunt, "Select Sea Event", "Select Sea Event", {"SeaBeast", "Terrorshark", "Ship", "Shark", "Piranha"}, false, "SeaBeast")
     bindDropdown(z.TabHunt, "Select Weapon", "Select Weapon", {"Melee", "Sword", "Gun", "Blox Fruit"}, false, "Sword")
 
+    bindWorkerAlias(z.TabHunt, "Go Find Leviathan", "Start Hunt Leviathan", "Go Find Leviathan", HuntLeviathanStep, 0.35)
+    bindWorkerAlias(z.TabHunt, "Auto Shoot Heart", "Shoot Heart When Ice Spike Breaks", "Auto Shoot Heart", ShootHeartLeviathan, 0.25)
     toggleWorker(z.TabHunt, "Attack Sea Event", "Attack Sea Event", AttackSeaEvent, 0.25)
+    bindWorkerAlias(z.TabHunt, "Drive Boat To Tiki (Beta)", "Drive Boat To Tiki", "Drive Boat To Tiki (Beta)", DriveBoatToTikiStep, 0.5)
+    bindWorkerAlias(z.TabHunt, "Drive Boat To Hydra (Beta)", "Drive Boat To Hydra", "Drive Boat To Hydra (Beta)", DriveBoatToHydraStep, 0.5)
     toggleWorker(z.TabHunt, "Auto All Skill", "Auto All Skill", AutoAllSkill, 0.12)
 
     local function bindSettingToggle(tab, key, title, defaultValue, onChanged)
         local initialValue = Settings[key] == true or (defaultValue == true and Settings[key] == nil)
-        tab:AddToggle(key, {
-            Title = title or key,
-            Default = initialValue,
-            Callback = function(value)
-                saveSetting(key, value)
-                if onChanged then pcall(onChanged, value) end
-            end
-        })
+        tab:AddToggle(key, { Title = title or key, Default = initialValue, Callback = function(value)
+            saveSetting(key, value); if onChanged then pcall(onChanged, value) end
+        end })
         if onChanged and initialValue then pcall(onChanged, true) end
     end
 
@@ -2095,43 +1979,105 @@ do
 
     z.TabHunt:AddButton({Title = "Buy Beast Hunter Boat", Callback = function()
         local boat = BuyBoat("Beast Hunter")
-        safeStatus(boat and "Beast Hunter boat ready" or "Moving to buy Beast Hunter boat", G.Colors and G.Colors.Yellow)
+        safeStatus(boat and "Beast Hunter ready" or "Buying Beast Hunter", G.Colors.Yellow)
     end})
     z.TabHunt:AddButton({Title = "Buy Brigade Boat", Callback = function()
         local boat = BuyBoat("Brigade")
-        safeStatus(boat and "Brigade boat ready" or "Moving to buy Brigade boat", G.Colors and G.Colors.Yellow)
+        safeStatus(boat and "Brigade ready" or "Buying Brigade", G.Colors.Yellow)
     end})
     z.TabHunt:AddButton({Title = "Find / Attack Selected Sea Event", Callback = function()
         local target = DetectSeaEvents(false)
-        if target then
-            AttackSeaEvent()
-            safeStatus("Attacking " .. tostring(target.Name), G.Colors and G.Colors.Green)
-        else
-            safeStatus("No selected sea event found", G.Colors and G.Colors.Yellow)
-        end
+        if target then AttackSeaEvent(); safeStatus("Attacking " .. tostring(target.Name), G.Colors.Green)
+        else safeStatus("No sea event found", G.Colors.Yellow) end
     end})
     z.TabHunt:AddButton({Title = "Teleport To Selected Sea Event", Callback = function()
         local target = DetectSeaEvents(false)
-        if target and TeleportSeaEvents(target) then
-            safeStatus("Moving to " .. tostring(target.Name), G.Colors and G.Colors.Yellow)
-        else
-            safeStatus("No selected sea event found", G.Colors and G.Colors.Red)
-        end
+        if target and TeleportSeaEvents(target) then safeStatus("Moving to " .. tostring(target.Name), G.Colors.Yellow)
+        else safeStatus("No sea event found", G.Colors.Red) end
     end})
     z.SettingSkillMain:AddButton({Title = "Equip Selected Weapon Type", Callback = function()
         local category = Settings["Select Weapon"] or "Sword"
         local tool = NameWeapon(category, true)
-        if tool then
-            equiptool(tool.Name)
-            safeStatus("Equipped " .. tostring(tool.Name), G.Colors and G.Colors.Green)
-        else
-            safeStatus("No weapon found for " .. tostring(category), G.Colors and G.Colors.Yellow)
-        end
+        if tool then equiptool(tool.Name); safeStatus("Equipped " .. tostring(tool.Name), G.Colors.Green)
+        else safeStatus("No " .. tostring(category) .. " weapon", G.Colors.Yellow) end
+    end})
+
+    toggleWorker(z.WebhookTab, "Webhook Drive To Tiki/Hydra", "Webhook Drive To Tiki/Hydra", function()
+        local boat = checkboatMulti()
+        local routeEnabled = Settings["Drive Boat To Hydra"] == true or Settings["Drive Boat To Tiki"] == true
+        webhookEdge("drive-to-tiki-hydra", boat ~= nil and routeEnabled, function()
+            postWebhook("Boat route", "Route active: " .. (Settings["Drive Boat To Hydra"] and "Hydra" or "Tiki"), "Webhook Drive To Tiki/Hydra")
+        end)
+    end, 2)
+
+    z.TabDevilFruit:AddButton({Title = "Store Fruits Now", Callback = function()
+        local ok, err = pcall(AutoStoreFruitStep)
+        safeStatus(ok and "Fruit storage done" or ("Failed: " .. tostring(err)), ok and G.Colors.Green or G.Colors.Red)
+    end})
+    z.TabDevilFruit:AddButton({Title = "Buy Random Now", Callback = function()
+        local ok, err = pcall(RandomDevilFruitStep)
+        if not ok then safeStatus("Buy failed: " .. tostring(err), G.Colors.Red) else RefreshStatusSpy() end
+    end})
+    z.TabHunt:AddButton({Title = "Check Leviathan Status", Callback = function()
+        local frozen = getFrozenDimension()
+        local seaBeasts = getSeaBeasts()
+        local leviathan = seaBeasts and (DetectLeviathan(seaBeasts) or DetectLeviathan(seaBeasts, 2) or DetectLeviathan(seaBeasts, 3) or DetectLeviathan(seaBeasts, 4))
+        local heart = getFrozenHeart()
+        local msg = frozen and "Frozen Dimension found" or (leviathan and "Leviathan found" or (heart and "Frozen Heart found" or "Searching for Leviathan"))
+        safeStatus(msg, G.Colors.Blue)
     end})
     z.WebhookTab:AddButton({Title = "Test Webhook", Callback = function()
         local ok = postWebhook("Kaitun Leviathan", "Webhook test successful.")
-        safeStatus(ok and "Webhook sent" or "Webhook failed - check URL", ok and G.Colors.Green or G.Colors.Red)
+        safeStatus(ok and "Webhook sent" or "Webhook failed", ok and G.Colors.Green or G.Colors.Red)
     end})
+
+    getgenv().IsMobAlive = IsMobAlive
+    getgenv().DetectPartSpawnMob = function(name, includeIgnored)
+        local function cleanName(value) return (tostring(value):gsub(" %p?Lv%.? %d+%p?", "")) end
+        local worldOrigin = Workspace:FindFirstChild("_WorldOrigin")
+        local spawns = worldOrigin and worldOrigin:FindFirstChild("EnemySpawns")
+        local targetName = cleanName(name)
+        if spawns then
+            for _, part in ipairs(spawns:GetChildren()) do
+                if part:IsA("BasePart") then
+                    local normalized = cleanName(part:GetAttribute("DisplayName") or part.Name)
+                    if (normalized == targetName or cleanName(part.Name) == targetName) and (includeIgnored or not part:FindFirstChild("Ignored")) then return part end
+                end
+            end
+        end
+        return nil
+    end
+    getgenv().PathFindChest = PathFindChest
+    getgenv().TurnOffNoclipBoat = function(boat) if not boat then return end
+        for _, part in ipairs(boat:GetDescendants()) do if part:IsA("BasePart") then part.CanCollide = true end end
+    end
+    getgenv().DistanceFindLeviathan = DistanceFindLeviathan
+    getgenv().MultiSegmentLeviathan = function(container, segmentId)
+        if segmentId == nil then return nil end
+        local maxDamage = tonumber(Settings["Value Damage Multi Segments"]) or 30000
+        if not container then return nil end
+        for _, segment in ipairs(container:GetChildren()) do
+            local health = segment:FindFirstChild("Health")
+            local trackedDamage = segment:FindFirstChild("Tinhdamage")
+            if segment.Name == "Leviathan Segment" and segment:GetAttribute("SegmentId") == segmentId and health and health.Value > 0
+                and (not trackedDamage or trackedDamage.Value < maxDamage) then return segment end
+        end
+        return nil
+    end
+    getgenv().checkboatFind = function()
+        local configured = Settings["Select Owner Boat Beast Hunter"]
+        if type(configured) == "string" and configured ~= "" then return getBoat(configured) or checkboat() end
+        return checkboat()
+    end
+    getgenv().AutoFireLeviathanHeart = ShootHeartLeviathan
+    getgenv().WebhookFindLeviathan = function(msg) return postWebhook("Leviathan found", msg or "Signal detected.", "Webhook Find Leviathan") end
+    getgenv().WebhookShootHeart = function(msg) return postWebhook("Leviathan Heart", msg or "Heart harpooned.", "Webhook Shoot Heart Leviathan") end
+    getgenv().WebhookUnlockDracov4 = function(msg) return postWebhook("Draco V4", msg or "Signal.", "Webhook Unlock Draco v4") end
+    getgenv().WebhookDestroyIdk = function(msg) return postWebhook("Boat status", msg or "Signal.", "Webhook Destroy IDK") end
+    getgenv().WebhookDriveTo = function(dest)
+        local target = dest or (Settings["Drive Boat To Hydra"] and "Hydra Island" or "Tiki Outpost")
+        return postWebhook("Boat route", "Active: " .. target, "Webhook Drive To Tiki/Hydra")
+    end
 
     if Settings["Start Hunt Leviathan"] then workerLoop("Start Hunt Leviathan", HuntLeviathanStep, 0.35) end
     if Settings["Auto light the torch"] then workerLoop("Auto light the torch", AutoLightTorch, 0.7) end
@@ -2141,6 +2087,7 @@ do
     if Settings["Auto Craft Scroll"] then workerLoop("Auto Craft Scroll", AutoCraftScrollStep, 2) end
     if Settings["Auto Store Fruit"] then workerLoop("Auto Store Fruit", AutoStoreFruitStep, 2) end
     if Settings["Random Devil Fruit"] then workerLoop("Random Devil Fruit", RandomDevilFruitStep, 1) end
-end
 
-pcall(G.SetStatus, "Ready", G and G.Colors and G.Colors.Green)
+    print("[Kaitun] All modules loaded")
+    pcall(function() G.SetStatus("Ready", G.Colors.Green) end)
+end
